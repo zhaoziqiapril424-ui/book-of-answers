@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a1510" />
+  <title>答案之书 · The Book of Answers</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: "Songti SC", "STSong", "SimSun", "Noto Serif SC", Georgia, serif;
+      color: #2c2419;
+      background: #14100c;
+      overflow-x: hidden;
+    }
+
+    /* 安静、纸质氛围 */
+    .stage {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: max(1rem, env(safe-area-inset-top)) 1.25rem max(1.5rem, env(safe-area-inset-bottom));
+      background:
+        radial-gradient(ellipse 120% 80% at 50% 20%, rgba(58, 42, 28, 0.45) 0%, transparent 55%),
+        radial-gradient(ellipse 100% 60% at 50% 100%, rgba(26, 18, 12, 0.9) 0%, transparent 50%),
+        linear-gradient(170deg, #1f1812 0%, #120e0a 45%, #0a0806 100%);
+      position: relative;
+    }
+    .stage::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.35;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+    .stage::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.65);
+    }
+
+    .title-block {
+      text-align: center;
+      margin-top: 0.5rem;
+      margin-bottom: 1.25rem;
+      z-index: 1;
+    }
+    .title-block h1 {
+      margin: 0;
+      font-weight: 600;
+      color: #c4a574;
+      text-shadow: 0 0 24px rgba(196, 165, 116, 0.25), 0 2px 8px rgba(0, 0, 0, 0.8);
+      line-height: 1.3;
+    }
+    .title-block h1 .ui-bi__zh {
+      font-size: clamp(1.5rem, 5vw, 1.85rem);
+      letter-spacing: 0.35em;
+      text-indent: 0.35em;
+    }
+    .title-block p {
+      margin: 0.5rem 0 0;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      color: rgba(196, 180, 150, 0.45);
+    }
+
+    .panel {
+      width: 100%;
+      max-width: 22rem;
+      z-index: 1;
+    }
+
+    .lang-tools {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.65rem 0.75rem;
+      align-items: end;
+      margin-bottom: 0.75rem;
+    }
+    .lang-tools .lang-field:nth-child(1),
+    .lang-tools .lang-field:nth-child(2) {
+      grid-column: span 2;
+    }
+    @media (min-width: 380px) {
+      .lang-tools {
+        grid-template-columns: 1fr 1fr;
+      }
+      .lang-tools .lang-field:nth-child(1),
+      .lang-tools .lang-field:nth-child(2) {
+        grid-column: auto;
+      }
+    }
+    .lang-field select {
+      width: 100%;
+      margin-top: 0.25rem;
+      padding: 0.55rem 0.65rem;
+      border-radius: 4px;
+      border: 1px solid rgba(90, 72, 52, 0.5);
+      background: rgba(28, 22, 16, 0.75);
+      color: #dccfb8;
+      font-size: 0.82rem;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .sound-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.65rem;
+    }
+    .sound-toggle input[type="checkbox"] {
+      accent-color: #a08060;
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .ui-bi {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+    }
+    .ui-bi--sub {
+      gap: 0.15rem;
+    }
+    .ui-bi__zh {
+      display: block;
+    }
+    .ui-bi__en {
+      display: block;
+      font-family: Georgia, "Times New Roman", Times, serif;
+      font-style: italic;
+      letter-spacing: 0.06em;
+      font-size: 0.48em;
+      font-weight: 400;
+      color: rgba(196, 165, 116, 0.48);
+      line-height: 1.35;
+    }
+    .title-block h1 .ui-bi__en {
+      font-size: clamp(0.68rem, 2.8vw, 0.82rem);
+      margin-top: 0.1rem;
+    }
+    .title-block .ui-bi--sub .ui-bi__en {
+      font-size: 0.68rem;
+      letter-spacing: 0.05em;
+    }
+
+    .field-label-bi .ui-bi__en {
+      font-size: 0.65rem;
+      margin-top: 0.06rem;
+      color: rgba(180, 160, 130, 0.42);
+    }
+
+    .lang-tools.lang-tools--single {
+      grid-template-columns: 1fr;
+      max-width: 100%;
+    }
+
+    .btn-bilingual {
+      display: flex;
+      flex-direction: column;
+      gap: 0.12rem;
+      align-items: center;
+      justify-content: center;
+      text-indent: 0;
+      letter-spacing: 0;
+      line-height: 1.35;
+    }
+    .btn-bilingual .btn-bi-zh {
+      letter-spacing: 0.18em;
+      text-indent: 0.18em;
+    }
+    .btn-bilingual .btn-bi-en {
+      font-family: Georgia, "Times New Roman", Times, serif;
+      letter-spacing: 0.06em;
+      text-indent: 0;
+      font-style: italic;
+      font-size: 0.78rem;
+      opacity: 0.88;
+      font-weight: 400;
+    }
+
+    .sound-toggle span .ui-bi__en {
+      display: inline;
+      font-size: 0.68em;
+      font-style: italic;
+      color: rgba(180, 160, 130, 0.45);
+      margin-left: 0.25rem;
+      letter-spacing: 0.03em;
+    }
+
+    .hint-bi.ui-bi {
+      gap: 0.08rem;
+    }
+    .hint-bi .ui-bi__en {
+      font-size: 0.62rem;
+      font-style: italic;
+      letter-spacing: 0.03em;
+      color: rgba(150, 130, 100, 0.36);
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      color: rgba(212, 196, 170, 0.55);
+      margin-bottom: 0.4rem;
+    }
+    .q-input {
+      width: 100%;
+      padding: 0.75rem 0.85rem;
+      border: 1px solid rgba(90, 72, 52, 0.5);
+      border-radius: 4px;
+      background: rgba(28, 22, 16, 0.65);
+      color: #e8dcc8;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .q-input::placeholder {
+      color: rgba(180, 160, 130, 0.35);
+    }
+    .q-input:focus {
+      border-color: rgba(196, 165, 116, 0.45);
+      box-shadow: 0 0 0 1px rgba(196, 165, 116, 0.15);
+    }
+
+    .actions {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .btn-secondary {
+      background: transparent;
+      color: rgba(200, 180, 150, 0.65);
+      border: 1px solid rgba(120, 100, 78, 0.45);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 4px 16px rgba(0, 0, 0, 0.35);
+    }
+    .btn-secondary:not(:disabled):hover {
+      color: rgba(218, 200, 170, 0.85);
+      border-color: rgba(160, 135, 100, 0.45);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 0 0 1px rgba(196, 165, 116, 0.12),
+        0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    .btn-secondary:disabled {
+      opacity: 0.28;
+      cursor: not-allowed;
+      border-color: rgba(90, 75, 60, 0.35);
+    }
+    .btn {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      min-height: 3rem;
+      padding: 0.65rem 1rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      letter-spacing: 0.2em;
+      text-indent: 0.2em;
+      border-radius: 4px;
+      transition: transform 0.15s, opacity 0.2s, box-shadow 0.2s;
+    }
+    .btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .btn-primary {
+      background: linear-gradient(180deg, #3d3228 0%, #2a221b 100%);
+      color: #d4c4a8;
+      border: 1px solid rgba(120, 100, 72, 0.4);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 8px 24px rgba(0, 0, 0, 0.45);
+    }
+    .btn-primary:not(:disabled):hover {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 0 0 1px rgba(196, 165, 116, 0.2),
+        0 10px 28px rgba(0, 0, 0, 0.5);
+    }
+
+    .book-wrap {
+      margin: 1.75rem auto 0;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+      width: 100%;
+    }
+
+    .book {
+      position: relative;
+      width: min(88vw, 17.5rem);
+      height: min(62vw, 24rem);
+      max-height: 70dvh;
+      /* 透视挂在书本本身，原点对齐左缘「书脊」——合上时像在绕订口转，而不是整块侧滑 */
+      perspective: clamp(900px, 100vw, 1500px);
+      perspective-origin: left center;
+      transform-style: preserve-3d;
+    }
+
+    .book__spine {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 10px;
+      background: linear-gradient(90deg, #1a1410, #2a2218, #1a1410);
+      transform: translateX(-5px) rotateY(-90deg);
+      transform-origin: right center;
+      border-radius: 2px 0 0 2px;
+      box-shadow: inset -2px 0 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .book__stack {
+      position: absolute;
+      inset: 0;
+      border-radius: 2px 6px 6px 2px;
+      background: linear-gradient(90deg, #e8dfd0 0%, #f2ebe0 8%, #efe8dc 50%, #e5ddd0 100%);
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+        inset 3px 0 8px rgba(0, 0, 0, 0.06),
+        -3px 0 12px rgba(0, 0, 0, 0.35),
+        6px 10px 28px rgba(0, 0, 0, 0.45),
+        inset -5px 0 0 rgba(254, 252, 246, 0.18),
+        4px 0 0 -1px rgba(228, 218, 202, 0.55),
+        7px 0 0 -2px rgba(218, 206, 188, 0.45),
+        10px 0 0 -3px rgba(208, 194, 174, 0.38),
+        13px 0 0 -4px rgba(198, 182, 162, 0.32);
+      transform: translateZ(0);
+      z-index: 0;
+    }
+    .book__stack::before {
+      content: "";
+      position: absolute;
+      inset: 6px 10px 6px 14px;
+      background: repeating-linear-gradient(
+        transparent,
+        transparent 22px,
+        rgba(44, 36, 25, 0.04) 22px,
+        rgba(44, 36, 25, 0.04) 23px
+      );
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .book__foreedge {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      width: 9px;
+      border-radius: 0 6px 6px 0;
+      background: linear-gradient(
+        90deg,
+        rgba(44, 36, 25, 0.06),
+        rgba(255, 250, 240, 0.35) 45%,
+        rgba(210, 198, 180, 0.6) 100%
+      );
+      transform: none;
+      opacity: 0.85;
+      pointer-events: none;
+      filter: saturate(0.85);
+      box-shadow: inset 1px 0 3px rgba(255, 255, 255, 0.25);
+    }
+
+    /* 单层薄页已由多层 riffle 替代，保留 DOM 占位避免改写脚本 */
+    .book__leaf {
+      display: none !important;
+    }
+
+    /* 翻开时夹在封面与答案页之间的多层纸叠（错位形成「哗啦翻很多页」） */
+    .book__riffle {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      transform-style: preserve-3d;
+      border-radius: 2px 6px 6px 2px;
+      z-index: 2;
+    }
+
+    .book__riffle-sheet {
+      --rs: 0;
+      position: absolute;
+      inset: 1px 2px 1px 1px;
+      border-radius: 2px 5px 5px 2px;
+      transform-origin: left center;
+      transform-style: preserve-3d;
+      background: linear-gradient(
+        105deg,
+        #fffefa 0%,
+        #faf5ec 52%,
+        #efe6d9 92%,
+        #e8ddcf 100%
+      );
+      box-shadow:
+        inset 0 0 0 1px rgba(170, 150, 120, 0.1),
+        inset 4px 0 14px rgba(255, 255, 248, 0.28),
+        inset -6px 0 14px rgba(0, 0, 0, 0.028),
+        -0.7px 0 6px rgba(0, 0, 0, 0.06);
+      opacity: 0.98;
+      backface-visibility: hidden;
+      transition: transform 1.34s cubic-bezier(0.19, 0.82, 0.29, 1);
+      transition-delay: calc(28ms + var(--rs) * 44ms);
+      transform: rotateY(0deg);
+    }
+
+    .book__riffle-sheet:nth-child(1) {
+      --rs: 0;
+    }
+    .book__riffle-sheet:nth-child(2) {
+      --rs: 1;
+    }
+    .book__riffle-sheet:nth-child(3) {
+      --rs: 2;
+    }
+    .book__riffle-sheet:nth-child(4) {
+      --rs: 3;
+    }
+    .book__riffle-sheet:nth-child(5) {
+      --rs: 4;
+    }
+    .book__riffle-sheet:nth-child(6) {
+      --rs: 5;
+    }
+    .book__riffle-sheet:nth-child(7) {
+      --rs: 6;
+    }
+    .book__riffle-sheet:nth-child(8) {
+      --rs: 7;
+    }
+    .book__riffle-sheet:nth-child(9) {
+      --rs: 8;
+    }
+    .book__riffle-sheet:nth-child(10) {
+      --rs: 9;
+    }
+    .book__riffle-sheet:nth-child(11) {
+      --rs: 10;
+    }
+    .book__riffle-sheet:nth-child(12) {
+      --rs: 11;
+    }
+
+    .book__riffle-sheet::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='rs'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23rs)' opacity='0.065'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+      pointer-events: none;
+    }
+
+    /* 书口一条略深的纸边 */
+    .book__riffle-sheet::after {
+      content: "";
+      position: absolute;
+      inset: 3px 1px 3px auto;
+      width: 2px;
+      border-radius: 0 2px 2px 0;
+      background: linear-gradient(
+        180deg,
+        rgba(92, 78, 60, 0.16) 0%,
+        rgba(255, 250, 240, 0.45) 35%,
+        rgba(140, 120, 95, 0.12) 100%
+      );
+      pointer-events: none;
+      opacity: 0.85;
+      box-shadow: inset 1px 0 1px rgba(255, 255, 248, 0.35);
+    }
+
+    .book.book--open:not(.book--closing) .book__riffle-sheet {
+      transform: rotateY(calc(-122deg - var(--rs) * 2.4deg));
+    }
+
+    .book.book--closing .book__riffle-sheet {
+      transform: rotateY(0deg);
+      transition-delay: 0ms;
+      transition-duration: 1.18s;
+      transition-timing-function: cubic-bezier(0.25, 0.06, 0.22, 1);
+    }
+
+    .book.book--closing .answer-line,
+    .book.book--closing .answer-line--divider {
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.14s ease, transform 0.14s ease;
+      transition-delay: 0s;
+    }
+
+    .book__page {
+      position: absolute;
+      inset: 0;
+      padding: clamp(1rem, 4vw, 1.35rem) clamp(1rem, 4vw, 1.25rem) clamp(1rem, 4vw, 1.25rem) clamp(1.15rem, 4vw, 1.4rem);
+      border-radius: 2px 6px 6px 2px;
+      background:
+        radial-gradient(ellipse 92% 28% at 50% -5%, rgba(255, 255, 250, 0.55), transparent),
+        radial-gradient(circle at 108% 50%, rgba(60, 48, 35, 0.05), transparent 38%),
+        linear-gradient(
+          178deg,
+          rgba(248, 244, 235, 0.95) 0%,
+          #fbf6ec 42%,
+          #f4ecdf 100%
+        );
+      box-shadow:
+        inset 0 0 0 1px rgba(155, 130, 100, 0.22),
+        inset 3px 0 18px rgba(0, 0, 0, 0.05),
+        inset -2px 0 14px rgba(255, 255, 250, 0.35),
+        inset 0 -3px 0 rgba(210, 195, 170, 0.15),
+        inset 0 36px 60px rgba(230, 215, 190, 0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transform: translateZ(0);
+      transition: box-shadow 0.8s ease;
+      z-index: 1;
+    }
+    .book__page::before {
+      content: "";
+      position: absolute;
+      inset: 8px 10px 8px 12px;
+      background: repeating-linear-gradient(
+        transparent,
+        transparent 21px,
+        rgba(74, 60, 45, 0.045) 21px,
+        rgba(74, 60, 45, 0.045) 22px
+      );
+      pointer-events: none;
+      opacity: 0.72;
+      border-radius: 1px;
+    }
+    .book__page::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.05' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.055'/%3E%3C/svg%3E");
+      pointer-events: none;
+      border-radius: inherit;
+      mix-blend-mode: multiply;
+    }
+    .book--animating .book__page {
+      box-shadow:
+        inset 0 0 0 1px rgba(155, 130, 100, 0.24),
+        inset 16px 0 28px rgba(255, 255, 248, 0.14),
+        inset -4px 0 20px rgba(0, 0, 0, 0.05),
+        0 0 24px rgba(255, 240, 210, 0.08);
+    }
+
+    .answer-stack {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.65rem;
+    }
+    .answer-line {
+      font-size: clamp(0.9rem, 3.5vw, 1.06rem);
+      line-height: 1.72;
+      letter-spacing: 0.05em;
+      color: #3a3228;
+      margin: 0;
+      opacity: 0;
+      transform: translateY(7px);
+      transition: opacity 0.72s ease 0.42s, transform 0.72s ease 0.42s;
+    }
+    #answerLine2 {
+      transition-delay: 0.55s, 0.55s;
+    }
+    .answer-line-serif {
+      font-family: Georgia, "Times New Roman", Times, serif;
+      letter-spacing: 0.025em;
+      font-style: italic;
+      font-size: clamp(0.82rem, 3.2vw, 0.98rem);
+      color: #4a4035;
+      line-height: 1.65;
+    }
+    .answer-line--divider {
+      display: block;
+      height: 1px;
+      margin: 0.15rem 0;
+      opacity: 0;
+      transition: opacity 0.6s ease 0.48s;
+      transform: translateY(5px);
+    }
+    .answer-line--divider::after {
+      content: "";
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(120, 100, 75, 0.22), transparent);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+      border-radius: 1px;
+    }
+    .book--revealed .answer-line {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .book--revealed .answer-line--divider {
+      opacity: 1;
+      transform: none;
+    }
+    .answer-line[hidden],
+    span[hidden],
+    hr[hidden] {
+      display: none !important;
+    }
+
+    .book__cover {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      transform-origin: left center;
+      transform: rotateY(0deg) translateZ(0.05px);
+      /* 合上时请勿过渡 box-shadow，阴影位移会被读成「横向滑动」，只铰链转动 */
+      transition: transform 1.08s cubic-bezier(0.4, 0.05, 0.2, 1);
+      z-index: 3;
+      border-radius: 2px 8px 8px 2px;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 40%),
+        linear-gradient(180deg, #2d241c 0%, #1e1812 45%, #16120e 100%);
+      box-shadow:
+        inset 0 0 0 1px rgba(120, 100, 72, 0.25),
+        inset 4px 0 22px rgba(0, 0, 0, 0.34),
+        3px 10px 28px rgba(0, 0, 0, 0.52);
+    }
+    .book__cover-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      border-radius: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .book__cover-face--front {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 30%, rgba(90, 70, 48, 0.35) 0%, transparent 60%),
+        linear-gradient(180deg, #322a22 0%, #221c16 100%);
+    }
+    .book__cover-front-text {
+      text-align: center;
+      padding: 0.65rem 0.85rem;
+      max-width: 92%;
+      z-index: 1;
+    }
+    .book__cover-title-zh {
+      font-size: clamp(1rem, 4.8vw, 1.35rem);
+      font-weight: 600;
+      letter-spacing: 0.28em;
+      text-indent: 0.28em;
+      color: #c9a971;
+      text-shadow:
+        0 0 20px rgba(196, 165, 116, 0.2),
+        0 2px 12px rgba(0, 0, 0, 0.75);
+      line-height: 1.35;
+      margin: 0 0 0.35rem;
+    }
+    .book__cover-title-en {
+      font-family: Georgia, "Times New Roman", Times, serif;
+      font-size: clamp(0.65rem, 2.55vw, 0.82rem);
+      font-style: italic;
+      letter-spacing: 0.05em;
+      color: rgba(196, 175, 140, 0.52);
+      margin: 0;
+      line-height: 1.4;
+      text-wrap: balance;
+    }
+    .book__cover-face--back {
+      transform: rotateY(180deg);
+      background:
+        linear-gradient(
+          90deg,
+          rgba(210, 198, 175, 0.35) 0%,
+          rgba(232, 222, 205, 0.55) 6%,
+          rgba(226, 214, 196, 0.9) 14%,
+          rgba(238, 228, 210, 1) 22%,
+          rgba(220, 208, 190, 0.95) 100%
+        );
+      box-shadow:
+        inset 10px 0 24px rgba(0, 0, 0, 0.12),
+        inset 0 0 0 1px rgba(170, 150, 120, 0.2),
+        inset 0 18px 32px rgba(255, 255, 248, 0.15);
+      overflow: hidden;
+    }
+    .book__cover-face--back::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          transparent,
+          transparent 17px,
+          rgba(92, 78, 60, 0.05) 17px,
+          rgba(92, 78, 60, 0.05) 18px
+        );
+      opacity: 0.45;
+      mix-blend-mode: multiply;
+    }
+    .book__cover-face--back::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)' opacity='0.06'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+    }
+
+    .book--open .book__cover {
+      transform: rotateY(-154deg) translateZ(0.05px);
+      box-shadow:
+        inset 0 0 0 1px rgba(120, 100, 72, 0.22),
+        inset -14px 0 26px rgba(0, 0, 0, 0.22),
+        2px 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .book--animating .book__cover {
+      transition:
+        transform 1.34s cubic-bezier(0.15, 0.82, 0.34, 1),
+        box-shadow 1s cubic-bezier(0.25, 0, 0.2, 1);
+      box-shadow:
+        inset 0 0 0 1px rgba(120, 100, 72, 0.24),
+        inset 3px 0 18px rgba(0, 0, 0, 0.32),
+        4px 16px 36px rgba(0, 0, 0, 0.45);
+    }
+
+    /* 合上：与内页同拍、固定合拢阴影（盖过 book--open），只过渡 transform */
+    .book.book--closing .book__cover {
+      box-shadow:
+        inset 0 0 0 1px rgba(120, 100, 72, 0.25),
+        inset 4px 0 22px rgba(0, 0, 0, 0.34),
+        3px 10px 28px rgba(0, 0, 0, 0.52);
+      transition: transform 1.18s cubic-bezier(0.25, 0.06, 0.22, 1);
+    }
+
+    .hint {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      color: rgba(160, 140, 110, 0.35);
+      z-index: 1;
+    }
+
+    @media (min-width: 480px) {
+      .book {
+        width: 17.5rem;
+        height: 24rem;
+        max-height: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .book__cover {
+        transition-duration: 0.01ms;
+      }
+      .book__riffle-sheet {
+        transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
+      }
+      .answer-line {
+        transition: none;
+      }
+      .book--revealed .answer-line {
+        opacity: 1;
+        transform: none;
+      }
+      .book--revealed .answer-line--divider {
+        opacity: 1;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="title-block">
+      <h1 class="ui-bi">
+        <span class="ui-bi__zh">答案之书</span>
+        <span class="ui-bi__en">The Book of Answers</span>
+      </h1>
+      <p class="ui-bi ui-bi--sub">
+        <span class="ui-bi__zh">轻声一问，纸页自开</span>
+        <span class="ui-bi__en">Whisper once—paper opens on its hinge</span>
+      </p>
+    </div>
+
+    <div class="panel">
+      <div class="lang-tools lang-tools--single">
+        <div class="lang-field">
+          <label class="field-label-bi ui-bi" for="answerModeSel">
+            <span class="ui-bi__zh">答案显示</span>
+            <span class="ui-bi__en">How answers appear</span>
+          </label>
+          <select id="answerModeSel" autocomplete="off">
+            <option value="bilingual" selected>中文 + English（对照）· Chinese &amp; English</option>
+            <option value="zh">简体中文 · Chinese only</option>
+            <option value="en">English only · 仅英文</option>
+            <option value="ja">日本語 · Japanese</option>
+            <option value="ko">한국어 · Korean</option>
+            <option value="fr">Français · French</option>
+            <option value="es">Español · Spanish</option>
+          </select>
+        </div>
+      </div>
+      <label class="field-label-bi ui-bi" for="question">
+        <span class="ui-bi__zh">你的心事（可留空）</span>
+        <span class="ui-bi__en">What’s on your mind (optional)</span>
+      </label>
+      <input
+        id="question"
+        class="q-input"
+        type="text"
+        maxlength="80"
+        placeholder="写下问题 · Write your question, or leave empty"
+        autocomplete="off"
+      />
+      <label class="lang-field sound-toggle" for="soundOn">
+        <input type="checkbox" id="soundOn" checked />
+        <span>
+          <span class="ui-bi__zh">翻页音效</span>
+          <span class="ui-bi__en">Page-turn sound</span>
+        </span>
+      </label>
+      <div class="actions">
+        <button type="button" class="btn btn-primary btn-bilingual" id="askBtn">
+          <span class="btn-bi-zh">翻开书页</span>
+          <span class="btn-bi-en">Open the book</span>
+        </button>
+        <button type="button" class="btn btn-secondary btn-bilingual" id="closeBtn" disabled aria-disabled="true">
+          <span class="btn-bi-zh">合上书页</span>
+          <span class="btn-bi-en">Close the book</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="book-wrap" aria-live="polite">
+      <div class="book" id="book" role="img" aria-label="答案之书，The Book of Answers">
+        <div class="book__spine" aria-hidden="true"></div>
+        <div class="book__stack" aria-hidden="true"></div>
+        <div class="book__riffle" aria-hidden="true">
+          <span class="book__riffle-sheet"></span>
+          <span class="book__riffle-sheet"></span>
+          <span class="book__riffle-sheet"></span>
+          <span class="book__riffle-sheet"></span>
+          <span class="book__riffle-sheet"></span>
+          <span class="book__riffle-sheet"></span>
+          <span class="book__riffle-sheet"></span>
+          <span class="book__riffle-sheet"></span>
+          <span class="book__riffle-sheet"></span>
+          <span class="book__riffle-sheet"></span>
+          <span class="book__riffle-sheet"></span>
+          <span class="book__riffle-sheet"></span>
+        </div>
+        <div class="book__page">
+          <div class="answer-stack" id="answerStack">
+            <p class="answer-line" id="answerLine1" lang="zh-CN">&hellip;</p>
+            <span class="answer-line answer-line--divider" id="answerDivider" aria-hidden="true"></span>
+            <p class="answer-line answer-line-serif" id="answerLine2" lang="en" hidden>&nbsp;</p>
+          </div>
+          <span class="book__foreedge" aria-hidden="true"></span>
+        </div>
+        <div class="book__leaf" aria-hidden="true"></div>
+        <div class="book__cover" aria-hidden="true">
+          <div class="book__cover-face book__cover-face--front">
+            <div class="book__cover-front-text">
+              <p class="book__cover-title-zh">答案之书</p>
+              <p class="book__cover-title-en">The Book of Answers</p>
+            </div>
+          </div>
+          <div class="book__cover-face book__cover-face--back"></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="hint hint-bi ui-bi" id="hintLine">
+      <span class="ui-bi__zh">仅供娱乐与自省，并非预言。</span>
+      <span class="ui-bi__en">For reflection and amusement—not prophecy.</span>
+    </p>
+  </div>
+
+  <script>
+    (function () {
+      var ANSWERS = [{"zh": "不必追问，答案已在心中。", "en": "You needn't press further—the answer already rests in your heart.", "ja": "追い求めなくていい。答えはもう心の中にある。", "ko": "더는 묻지 마라. 답은 이미 마음 깊은 곳에 있다.", "fr": "Pas besoin d'insister : la réponse est déjà en toi.", "es": "No hace falta insistir más: la respuesta ya está en tu interior."}, {"zh": "再耐心等一等。", "en": "Wait a little longer, with quiet patience.", "ja": "もう少し、静かに待とう。", "ko": "조금 더, 조용히 기다려라.", "fr": "Encore un peu de patience, doucement.", "es": "Espera un poco más, con calma."}, {"zh": "此刻，适合沉默。", "en": "This moment asks for silence.", "ja": "今この瞬間には、沈黙が似合う。", "ko": "지금 이 순간에는 침묵이 어울린다.", "fr": "Pour l'instant, le silence convient mieux.", "es": "Este momento pide silencio."}, {"zh": "是的，但别声张。", "en": "Yes—carry it softly; no need to broadcast it yet.", "ja": "はい。ただし今は、そっと胸にしまって。", "ko": "그렇다—다만 지금은 소리 내지 말고 품다.", "fr": "Oui—mais garde-le précieux encore un temps.", "es": "Sí—pero guárdalo con suavidad; aún no lo proclames."}, {"zh": "时机尚未成熟。", "en": "The season hasn't ripened.", "ja": "時は、まだ熟していない。", "ko": "아직 때가 무르익지 않았다.", "fr": "Le moment n'est pas encore venu.", "es": "La sazón aún no madura."}, {"zh": "放手，反而更接近。", "en": "Letting go brings you closer.", "ja": "手放すと、かえって近づく。", "ko": "놓으면 오히려 가까워진다.", "fr": "Lâcher prise vous rapproche.", "es": "Soltar te acerca."}, {"zh": "你所顾虑的，多为虚影。", "en": "Much of what worries you is phantom weight.", "ja": "心配の多くは、影のようなもの。", "ko": "걱정의 많은 부분은 그림자에 가깝다.", "fr": "Beaucoup de vos craintes ne sont que brume.", "es": "Buena parte de tu inquietud es bruma."}, {"zh": "向东而行，柳暗花明。", "en": "Go east—the path brightens there.", "ja": "東へ進め。そこに光が差す。", "ko": "동쪽으로 가라—길이 밝아지는 곳이 있다.", "fr": "Allez vers l'est : la voie s'éclaircit.", "es": "Ve al este: el camino aclara."}, {"zh": "相信直觉，但核验事实。", "en": "Trust your intuition, then check the facts.", "ja": "直感を信じ、そのあと事実で確かめよう。", "ko": "직관을 믿되, 사실은 따로 확인하라.", "fr": "Suivez l'intuition, puis vérifiez les faits.", "es": "Confía en la intuición y luego contrasta hechos."}, {"zh": "需要先休息一阵子。", "en": "Rest awhile first.", "ja": "まず少し休もう。", "ko": "먼저 잠시 쉬어라.", "fr": "Reposez-vous un peu avant la suite.", "es": "Descansa un poco primero."}, {"zh": "有人会帮你，但不是你期待的那位。", "en": "Help will arrive, but not always from whom you expect.", "ja": "助けは来る。けれど思い描いた誰かからとは限らない。", "ko": "도움은 온다—다만 기대했던 사람이 아닐 수도 있다.", "fr": "De l'aide viendra—mais peut-être pas du visage imaginé.", "es": "Llegará ayuda, aunque no siempre de quien imaginas."}, {"zh": "写下来，比在脑中盘旋更好。", "en": "Write it down—paper stills a circling mind.", "ja": "書き留めよう。紙の方が、頭の中のループを早く止める。", "ko": "글로 남겨라—종이가 맴도는 생각보다 빨리 잠재운다.", "fr": "Écrivez : le papier arrête les pensées en boucle.", "es": "Escríbelo: el papel frena el bucle mental."}, {"zh": "重复旧路无益，换一个角度。", "en": "Retracing old routes helps little; widen the view.", "ja": "同じ道を繰り返しても進まない。視点を変えよう。", "ko": "예전 길만 반복해서는 어렵다. 시선을 넓혀라.", "fr": "Réemplunter le même chemin n'aide guère : élargissez l'angle.", "es": "Repetir el mismo sendero poco ayuda; ensancha el ángulo."}, {"zh": "答案模糊，正因如此才值得探索。", "en": "The answer stays blurry—so the search is worth it.", "ja": "答えは曖昧だからこそ、探す価値がある。", "ko": "답은 흐릿해서—더 탐하게 만든다.", "fr": "Réponse trouble : tant mieux pour l'exploration.", "es": "La respuesta es borrosa—por eso vale la búsqueda."}, {"zh": "这次，要主动一点。", "en": "This time, take the first step yourself.", "ja": "今回は自分から一歩を。", "ko": "이번엔 네가 먼저 움직여라.", "fr": "Cette fois, avancez d'un pas vous-même.", "es": "Esta vez da tú el primer paso."}, {"zh": "退一步，看见的更多。", "en": "Step back—you'll see the wider frame.", "ja": "一歩下がれば、もっと全体が見える。", "ko": "한발 물러서면 더 큰 그림이 보인다.", "fr": "Reculez d'une mesure pour voir le tableau entier.", "es": "Da un paso atrás: verás el marco entero."}, {"zh": "坚持已有选择。", "en": "Stand by the choice you've begun.", "ja": "すでに選んだ道を、保とう。", "ko": "이미 택한 길을 붙들어라.", "fr": "Tenez le cap que vous avez choisi.", "es": "Mantén la senda que empezaste."}, {"zh": "暂勿决定，再等三日心境。", "en": "Decide nothing yet; let your heart turn three times.", "ja": "決めるのはあとまわしでいい。心が三つ巡るまで待とう。", "ko": "아직 결정 말아라—마음이 세 번 도돌 때까지 기다려라.", "fr": "Suspendez la décision : laissez l'humeur tourner trois fois.", "es": "Aún no decidas: deja que el ánimo gire tres veces."}, {"zh": "表面之下另有真相。", "en": "Another truth lies beneath the surface.", "ja": "見えている下に、別の真実がある。", "ko": "겉층 아래 또 다른 진실이 있다.", "fr": "Sous la surface bat une autre vérité.", "es": "Bajo la superficie late otra verdad."}, {"zh": "你已知道该怎么做。", "en": "You already sense the next move.", "ja": "次に何をするか、もうわかっている。", "ko": "다음에 무엇을 할지, 이미 안다.", "fr": "Le prochain mouvement, vous le connaissez déjà.", "es": "Ya intuyes el siguiente movimiento."}, {"zh": "这不是终点，是一段折页。", "en": "This isn't the ending—only a dog-eared pause.", "ja": "終わりではない。折り目がついた一節だ。", "ko": "끝이 아니라—접힌 듯한 한 장이다.", "fr": "Ce n'est pas la fin : seulement un pli dans la page.", "es": "No es el final: solo un pliegue en la página."}, {"zh": "把注意力放回当下的一刻。", "en": "Pour your attention into this present breath.", "ja": "意識を、今この一瞬へ戻そう。", "ko": "주의를 지금 이 한순간으로 되돌려라.", "fr": "Ramenez l'attention à cet instant précis.", "es": "Vuelve la atención a este aliento presente."}, {"zh": "与其问天意，不如问诚意。", "en": "Ask less about destiny—ask more about sincerity.", "ja": "天意を問うより、自分への誠実を問おう。", "ko": "하늘의 뜻보다 진심을 물어라.", "fr": "Moins de questions au ciel, plus de sincérité avec vous.", "es": "Pregunta menos al cielo y más a tu sinceridad."}, {"zh": "风会转向，你也要转向。", "en": "Winds shift—you must turn with them.", "ja": "風向きが変わる。あなたも向きを変えればいい。", "ko": "바람이 바뀐다—너 또한 방향을 바꿔라.", "fr": "Le vent tourne ; vous aussi, pivotez.", "es": "El viento gira: tú también."}, {"zh": "不必告诉所有人你的想法。", "en": "You owe your thoughts to no chorus.", "ja": "すべての人に考えを明かさなくていい。", "ko": "모두에게 마음을 말할 의무는 없다.", "fr": "Pas besoin d'exposer vos pensées à tout le monde.", "es": "No debes contar tu mente a toda la galería."}, {"zh": "小心过于完美的承诺。", "en": "Guard against promises that sparkle too perfectly.", "ja": "あまりに完璧に輝く約束には注意を。", "ko": "지나치게 완벽해 보이는 약속을 경계하라.", "fr": "Méfiez-vous des promesses trop parfaites.", "es": "Desconfía del brillo sin sombra."}, {"zh": "小的改变会带来大的松动。", "en": "Tiny shifts unlock larger loosening.", "ja": "小さな変化が、大きな固まりをほどく。", "ko": "작은 변화가 큰 숨통을 트게 한다.", "fr": "Un léger mouvement débloque l'ensemble.", "es": "Un cambio pequeño afloja lo grande."}, {"zh": "你会得到所求的一部分，而非全部。", "en": "You'll receive part of what you seek—not all at once.", "ja": "求めるもののすべてではなく、その一部が手に入る。", "ko": "바라는 모든 것이 오지 않는다—일부만 온다.", "fr": "Vous obtiendrez une part—pas tout d'un coup.", "es": "Recibirás una parte—no todo de golpe."}, {"zh": "书页尚未写完，由你续写。", "en": "The page isn't finished—you keep writing it.", "ja": "ページはまだ空白。続きを書くのはあなた。", "ko": "아직 페이지는 비었다—네가 이어 쓴다.", "fr": "Les pages sont vierges encore : poursuivez.", "es": "La página sigue abierta—tú la sigues."}, {"zh": "先完成手中事，再想远方。", "en": "Finish what's in hand before chasing far horizons.", "ja": "手元の用事を済ませてから、遠くを見よう。", "ko": "손안의 일을 마친 뒤 먼 곳을 꿈꿔라.", "fr": "Concluez ce qui dépend déjà des mains avant l'ailleurs.", "es": "Cierra primero lo de tus manos antes de ansiar horizontes."}, {"zh": "答案在行动里，不在反复自问里。", "en": "The answer hides in action, not endless self-quiz.", "ja": "答えは行動にあり、同じ問いの繰り返しにはあまりない。", "ko": "답은 행동에 있고 같은 질문의 반복에는 없다.", "fr": "La réponse se marche mieux qu'elle ne se rabâche dedans vous.", "es": "La respuesta camina mejor que preguntándose eternamente."}, {"zh": "保持柔软，比保持正确更重要。", "en": "Softness outlasts insisting on being right.", "ja": "正しさより、しなやかさが長くもつ。", "ko": "무조건 옳음보다 부드러움이 더 오래 간다.", "fr": "La souplesse dure mieux que d'avoir raison à tout prix.", "es": "La flexibilidad dura más que la necesidad de tener razón."}, {"zh": "这不是「不」，只是「尚未」。", "en": "It isn't refusal—only a gentle \"not yet\".", "ja": "「ダメ」ではなく、「まだ」だ。", "ko": "거절이 아니라 '아직'이다.", "fr": "Ce n'est pas un « non », seulement un « pas encore ».", "es": "No es un no: solo un «aún no»."}, {"zh": "把问题拆小，每个都有答案。", "en": "Break the question small—each crumb can answer.", "ja": "問いを小さく分けよう。それぞれに答えがある。", "ko": "질문을 잘개 쪼개라—작은 것마다 답이 있다.", "fr": "Fractionnez la question jusqu'à ses réponses fines.", "es": "Parte la pregunta: cada migaja responde."}, {"zh": "今日宜独处，明日宜倾诉。", "en": "Today favors solitude; tomorrow favors sharing.", "ja": "今日は一人の時間が合う。明日は話すのが合う。", "ko": "오늘은 혼자가 맞고, 내일은 털어놓음이 낫다.", "fr": "Aujourd'hui se taire aide ; demain échanger aidera.", "es": "Hoy conviene soledad; mañana, confesar."}, {"zh": "你会笑看此刻的焦虑。", "en": "One day you'll smile at today's unease.", "ja": "いつか今の不安を、笑い飛ばす日が来る。", "ko": "언젠가 오늘의 불안은 웃어 넘길 일이 된다.", "fr": "Ce trac deviendra un jour un sourire rétrospectif.", "es": "Algún día reirás esta inquietud de hoy."}, {"zh": "信任过程，即使它显得缓慢。", "en": "Trust the unfolding, even when it crawls.", "ja": "遅く感じても、なりゆきを信じよう。", "ko": "더디게 느껴도 과정을 믿어라.", "fr": "Faites confiance au déploiement, même lent.", "es": "Confía en el proceso, aunque vaya despacio."}, {"zh": "有一扇门一直虚掩着。", "en": "A door stays ajar—you mistook it for a wall.", "ja": "扉はずっと少し開いている。壁だと思っていただけかもしれない。", "ko": "문 하나는 계속 살짝 열려 있다—너는 벽으로 착각했을지도 모른다.", "fr": "Une porte reste entr'ouverte : vous la preniez pour un mur.", "es": "Una puerta sigue entreabierta—la creías muro."}, {"zh": "先原谅自己，再谈其他。", "en": "Forgive yourself first; speak to the world after.", "ja": "まず自分を許してから、他のことに向かおう。", "ko": "먼저 자신을 용서하고 나서 다른 이야기를 하라.", "fr": "Absolvez-vous d'abord, dialoguez après.", "es": "Perdónate antes de pactar afuera."}, {"zh": "数字「三」对你此刻有意义。", "en": "The number three hums with meaning for you now.", "ja": "今は「三」という数字に、意味が宿る。", "ko": "지금은 숫자 '셋'이 의미를 품는다.", "fr": "Le chiffre trois résonne particulièrement pour vous.", "es": "El tres resuena con sentido para ti ahora."}, {"zh": "把期待调低一度，把耐心调高一度。", "en": "Lower expectation one notch—raise patience one notch.", "ja": "期待を少し下げ、忍耐を少し上げよう。", "ko": "기대를 한 줄 낮추고 인내를 한 줄 높여라.", "fr": "Baissez l'attente d'un cran, augmentez la patience d'un cran.", "es": "Baja un tanto la expectativa y sube un tanto la paciencia."}, {"zh": "表面拒绝，内心犹豫——再给自己一次机会。", "en": "A hard no cloaks doubt—offer yourself one more earnest try.", "ja": "断りの裏にためらいがある。もう一度、正直に挑戦してもいい。", "ko": "단호한 거절 뒤에 망설임이 있다—한 번 더 정직하게 시도해 보라.", "fr": "Derrière une fin de non-recevoir, l'hésite : essayez encore honnêtement.", "es": "El no rotundo oculta duda: intenta una pasada más honrada."}, {"zh": "旧物可弃，旧习难弃；从最小的一步开始。", "en": "Things leave easily; habits cling—start with the smallest stride.", "ja": "物は捨てやすい。くせは残る。いちばん小さな一歩から。", "ko": "물건은 버리기 쉽지만 습관은 남는다—가장 작은 걸음부터.", "fr": "Les objets s'en vont vite ; habitudes résistent ; commencez minuscule.", "es": "Los objetos se van; hábitos se aferran; empieza minúsculo."}, {"zh": "夜读比昼思更澄清。", "en": "Thoughts clear more by lamplight than midday worry.", "ja": "夜に読む方が、昼のぐるぐるより澄むことが多い。", "ko": "낮의 맴돔보다 등불 아래 글이 더 맑아진다.", "fr": "Une page lue le soir éclaire plus qu'une journée d'inquiétude.", "es": "La luz nocturna aclara mejor que rumiar de día."}, {"zh": "你会在意外之处得到点拨。", "en": "A nudge arrives from an unexpected quarter.", "ja": "思いがけないところから、ささやきが届く。", "ko": "뜻밖의 곳에서 길잡이가 온다.", "fr": "Un signal viendra d'un coin imprévu.", "es": "Un roce llegará desde donde no esperas."}, {"zh": "这不是对错问题，而是节奏问题。", "en": "It's less about right versus wrong—more about rhythm.", "ja": "善悪というより、テンポと間合いの話だ。", "ko": "옳고 그름의 문제보다 리듬의 문제에 가깝다.", "fr": "Ce n'est pas droit contre tort : rythmes et timings comptent.", "es": "No es tanto bien contra mal como ritmo contra prisa."}];
+
+      var LATIN_SERIF = { en: true, fr: true, es: true };
+
+      var answerModeSel = document.getElementById("answerModeSel");
+      var askBtn = document.getElementById("askBtn");
+      var closeBtn = document.getElementById("closeBtn");
+      var book = document.getElementById("book");
+      var bookCover = book.querySelector(".book__cover");
+      var answerLine1 = document.getElementById("answerLine1");
+      var answerLine2 = document.getElementById("answerLine2");
+      var answerDivider = document.getElementById("answerDivider");
+      var soundOn = document.getElementById("soundOn");
+
+      var animating = false;
+      var openTimer;
+      var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      var audioCtx = null;
+
+      /** @type {{ index: number, row: Record<string,string>}|null} */
+      var currentPick = null;
+
+      function answerMode() {
+        return answerModeSel.value || "bilingual";
+      }
+
+      function updateButtonStates() {
+        var isOpen = book.classList.contains("book--open");
+        askBtn.disabled = animating;
+        var closeDis = animating || !isOpen;
+        closeBtn.disabled = closeDis;
+        closeBtn.setAttribute("aria-disabled", closeDis ? "true" : "false");
+      }
+
+      function ensureAudio() {
+        if (audioCtx) return audioCtx;
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        audioCtx = new AC();
+        return audioCtx;
+      }
+
+      /**
+       * 轻轻沙沙声：粉噪 + Hann 平滑包络，不用带通凸起与密集瞬态（那些容易听上去「怪」「假」）。
+       * @param {boolean} gentle
+       * @param {boolean} sustained 主翻开略长但仍很轻
+       */
+      function playPageRustle(gentle, sustained) {
+        if (reducedMotion.matches || !soundOn.checked) return;
+        if (sustained === undefined) sustained = !gentle;
+        try {
+          var ctx = ensureAudio();
+          if (!ctx) return;
+          if (ctx.state === "suspended") ctx.resume();
+
+          var rate = ctx.sampleRate;
+          var dur = sustained
+            ? gentle
+              ? 0.44
+              : 0.92
+            : gentle
+              ? 0.2
+              : 0.24;
+          var n = Math.floor(rate * dur);
+          var n1 = Math.max(1, n - 1);
+          var buf = ctx.createBuffer(1, n, rate);
+          var d = buf.getChannelData(0);
+
+          var pink = 0;
+          var smooth = 0;
+          var i = 0;
+          for (; i < n; i++) {
+            var t = i / rate;
+            var u = i / n1;
+            var win = 0.5 * (1 - Math.cos(2 * Math.PI * u));
+            var white = Math.random() * 2 - 1;
+            pink = pink * 0.993 + white * 0.007;
+
+            smooth += (white * 0.15 + pink * 0.85 - smooth) * 0.12;
+            var rustle = smooth * win;
+
+            var lfo =
+              gentle || sustained ? 1 + 0.045 * Math.sin(t * (sustained ? 11 : 16) + 0.7) : 1;
+            rustle *= lfo;
+
+            var peak = sustained ? (gentle ? 0.055 : 0.062) : gentle ? 0.048 : 0.056;
+            d[i] = Math.max(-0.35, Math.min(0.35, rustle * peak));
+          }
+
+          var src = ctx.createBufferSource();
+          src.buffer = buf;
+
+          var hp = ctx.createBiquadFilter();
+          hp.type = "highpass";
+          hp.frequency.value = 620;
+          hp.Q.value = 0.52;
+
+          var lp = ctx.createBiquadFilter();
+          lp.type = "lowpass";
+          lp.frequency.value = 5200;
+          lp.Q.value = 0.55;
+
+          var g = ctx.createGain();
+          g.gain.value = gentle ? (sustained ? 0.2 : 0.18) : sustained ? 0.24 : 0.21;
+
+          src.connect(hp).connect(lp).connect(g).connect(ctx.destination);
+          src.start();
+        } catch (_e) {}
+      }
+
+      function pickAnswerObj() {
+        var i = Math.floor(Math.random() * ANSWERS.length);
+        return { index: i, row: ANSWERS[i] };
+      }
+
+      function setTypography(el, langCode) {
+        el.classList.toggle("answer-line-serif", !!LATIN_SERIF[langCode]);
+      }
+
+      /** @param {boolean} interim */
+      function renderAnswerSlots(interim) {
+        interim = interim || false;
+        if (interim) {
+          answerLine1.textContent = "\u2026\u2026";
+          answerLine2.textContent = "";
+          answerLine2.hidden = true;
+          answerDivider.hidden = true;
+          return;
+        }
+        if (!currentPick) {
+          answerLine1.textContent = "\u2026";
+          answerLine2.textContent = "";
+          answerLine2.hidden = true;
+          answerDivider.hidden = true;
+          return;
+        }
+        var row = currentPick.row;
+        var mode = answerMode();
+
+        if (mode === "bilingual") {
+          answerLine1.textContent = row.zh || "";
+          answerLine1.lang = "zh-CN";
+          setTypography(answerLine1, "zh");
+
+          answerLine2.textContent = row.en || "";
+          answerLine2.lang = "en";
+          setTypography(answerLine2, "en");
+
+          answerLine2.hidden = false;
+          answerDivider.hidden = false;
+          return;
+        }
+
+        answerDivider.hidden = true;
+        answerLine2.hidden = true;
+
+        var code = mode;
+        var text = row[code] || row.en || row.zh || "";
+        answerLine1.textContent = text;
+        answerLine1.lang =
+          code === "zh"
+            ? "zh-CN"
+            : code === "ja"
+              ? "ja"
+              : code === "ko"
+                ? "ko"
+                : code === "fr"
+                  ? "fr"
+                  : code === "es"
+                    ? "es"
+                    : "en";
+        setTypography(answerLine1, code);
+      }
+
+      function bumpReveal(resetTransition) {
+        book.classList.remove("book--revealed");
+        if (resetTransition) void book.offsetWidth;
+        clearTimeout(openTimer);
+        openTimer = setTimeout(function () {
+          book.classList.add("book--revealed");
+        }, 40);
+      }
+
+      function openBook() {
+        if (animating) return;
+        animating = true;
+        updateButtonStates();
+
+        book.classList.remove("book--closing");
+
+        var wasOpen = book.classList.contains("book--open");
+
+        currentPick = pickAnswerObj();
+
+        if (wasOpen) playPageRustle(true, false);
+
+        function revealAnswer() {
+          renderAnswerSlots(false);
+          bumpReveal(false);
+        }
+
+        function runOpen() {
+          renderAnswerSlots(false);
+          book.classList.remove("book--animating");
+          void book.offsetWidth;
+          book.classList.add("book--animating");
+
+          book.classList.add("book--open");
+          bumpReveal(false);
+
+          updateButtonStates();
+
+          playPageRustle(false, true);
+
+          setTimeout(function () {
+            book.classList.remove("book--animating");
+            animating = false;
+            updateButtonStates();
+          }, 1980);
+        }
+
+        if (reducedMotion.matches) {
+          book.classList.add("book--open", "book--animating");
+          revealAnswer();
+          updateButtonStates();
+          setTimeout(function () {
+            animating = false;
+            book.classList.remove("book--animating");
+            updateButtonStates();
+          }, 120);
+          return;
+        }
+
+        book.classList.remove("book--revealed", "book--animating");
+        renderAnswerSlots(true);
+
+        function afterCloseGap() {
+          runOpen();
+        }
+
+        if (wasOpen) {
+          book.classList.remove("book--open");
+          void book.offsetWidth;
+          setTimeout(afterCloseGap, 1100);
+        } else {
+          book.classList.remove("book--open");
+          void book.offsetWidth;
+          runOpen();
+        }
+      }
+
+      function closeBook() {
+        if (animating) return;
+        if (!book.classList.contains("book--open")) return;
+
+        animating = true;
+        updateButtonStates();
+
+        clearTimeout(openTimer);
+
+        var closeDone = false;
+        var fallbackTimer;
+
+        function finishClose() {
+          if (closeDone) return;
+          closeDone = true;
+          if (fallbackTimer) clearTimeout(fallbackTimer);
+          if (bookCover) bookCover.removeEventListener("transitionend", onCoverEnd);
+
+          clearTimeout(openTimer);
+          book.classList.remove(
+            "book--closing",
+            "book--animating",
+            "book--open",
+            "book--revealed"
+          );
+          currentPick = null;
+          renderAnswerSlots(true);
+          animating = false;
+          updateButtonStates();
+        }
+
+        function onCoverEnd(ev) {
+          if (ev.target !== bookCover) return;
+          if (ev.propertyName !== "transform") return;
+          finishClose();
+        }
+
+        book.classList.add("book--closing");
+        book.classList.remove("book--revealed");
+        playPageRustle(true, true);
+
+        if (reducedMotion.matches) {
+          book.classList.remove("book--open");
+          finishClose();
+          return;
+        }
+
+        if (bookCover) bookCover.addEventListener("transitionend", onCoverEnd);
+
+        fallbackTimer = setTimeout(finishClose, 1680);
+
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            book.classList.remove("book--open");
+          });
+        });
+      }
+
+      answerModeSel.addEventListener("change", function () {
+        try {
+          localStorage.setItem("boa_answerMode", answerModeSel.value);
+        } catch (_e) {}
+        if (currentPick) {
+          bumpReveal(true);
+          renderAnswerSlots(false);
+        }
+      });
+
+      try {
+        var sMode = localStorage.getItem("boa_answerMode");
+        if (
+          sMode &&
+          ["bilingual", "zh", "en", "ja", "ko", "fr", "es"].indexOf(sMode) >= 0
+        )
+          answerModeSel.value = sMode;
+      } catch (_e) {}
+
+      renderAnswerSlots(true);
+      updateButtonStates();
+
+      askBtn.addEventListener("click", openBook);
+      closeBtn.addEventListener("click", closeBook);
+    })();
+
+  </script>
+</body>
+</html>
